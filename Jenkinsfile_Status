@@ -1,0 +1,30 @@
+pipeline{
+    agent { 
+        label 'kubernetes'
+  }
+    stages{
+        //stage('Clone Code'){
+            //steps{
+                //sh "echo cloning code"
+                //sh "echo clone code complete"
+                //git 'https://github.com/Ohubabs/DB-ArsenalStatic.git'
+            //}
+        //}
+        stage('Check Pods Are Running'){
+            steps{
+              withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws_cred', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                sh "echo 'Check Pods Are Running'"
+                sh "kubectl get po -o wide -n arsenal"
+                }
+            }
+        }
+        //stage('Deploy Get Pods in Arsenal namespace'){
+        //    steps{
+        //      withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws_cred', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+        //        sh "echo 'Get Pods in WP namespace'"
+        //        sh "kubectl describe po -n arsenal"
+        //        }
+        //    }
+        //}
+    }
+} 
