@@ -1,0 +1,124 @@
+## @param commonLabels Add labels to all the deployed resources
+##
+commonLabels: {}
+## Bitnami NGINX image version
+## ref: https://hub.docker.com/r/bitnami/nginx/tags/
+## @param image.registry [default: REGISTRY_NAME] NGINX image registry
+## @param image.repository [default: REPOSITORY_NAME/nginx] NGINX image repository
+## @skip image.tag NGINX image tag (immutable tags are recommended)
+## @param image.digest NGINX image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
+## @param image.pullPolicy NGINX image pull policy
+## @param image.pullSecrets Specify docker-registry secret names as an array
+## @param image.debug Set to true if you would like to see extra information on logs
+##
+image:
+  registry: docker.io
+  repository: bitnami/nginx
+  tag: 1.27.0-debian-12-r1
+  digest: ""
+## @param replicaCount Number of NGINX replicas to deploy
+##
+replicaCount: 1
+## @param revisionHistoryLimit The number of old history to retain to allow rollback
+##
+revisionHistoryLimit: 10
+## @param updateStrategy.type NGINX deployment strategy type
+## @param updateStrategy.rollingUpdate NGINX deployment rolling update configuration parameters
+## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+##
+updateStrategy:
+  type: RollingUpdate
+  rollingUpdate: {}
+## @param podLabels Additional labels for NGINX pods
+## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+##
+podLabels:
+  app: arsenal
+## @param staticSiteConfigmap Name of existing ConfigMap with the server static site content
+##
+staticSiteConfigmap: "arsenal-config"
+## @param staticSitePVC Name of existing PVC with the server static site content
+## NOTE: This will override staticSiteConfigmap
+##
+staticSitePVC: ""
+## @section Traffic Exposure parameters
+
+## NGINX Service properties
+##
+service:
+  ## @param service.type Service type
+  ##
+  type: ClusterIP
+  ## @param service.ports.http Service HTTP port
+  ## @param service.ports.https Service HTTPS port
+  ##
+  ports:
+    http: 80
+    https: 443
+metrics:
+  ## @param metrics.enabled Start a side-car prometheus exporter
+  ##
+  enabled: true
+   ## Bitnami NGINX Prometheus Exporter image
+  ## ref: https://hub.docker.com/r/bitnami/nginx-exporter/tags/
+  ## @param metrics.image.registry [default: REGISTRY_NAME] NGINX Prometheus exporter image registry
+  ## @param metrics.image.repository [default: REPOSITORY_NAME/nginx-exporter] NGINX Prometheus exporter image repository
+  ## @skip metrics.image.tag NGINX Prometheus exporter image tag (immutable tags are recommended)
+  ## @param metrics.image.digest NGINX Prometheus exporter image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
+  ## @param metrics.image.pullPolicy NGINX Prometheus exporter image pull policy
+  ## @param metrics.image.pullSecrets Specify docker-registry secret names as an array
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/nginx-exporter
+    tag: 1.2.0-debian-12-r1
+    digest: ""
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## @param metrics.port NGINX Container Status Port scraped by Prometheus Exporter
+  ## Defaults to specified http port
+  ##
+  port: ""
+  ## @param metrics.extraArgs Extra arguments for Prometheus exporter
+  ## e.g:
+  ## extraArgs:
+  ##   - --nginx.timeout
+  ##   - 5s
+  ##
+  extraArgs: []
+  ## @param metrics.containerPorts.metrics Prometheus exporter container port
+  ##
+  containerPorts:
+    metrics: 9113
+  ## @param metrics.podAnnotations Additional annotations for NGINX Prometheus exporter pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+  ## @param metrics.securityContext.enabled Enabled NGINX Exporter containers' Security Context
+  ## @param metrics.securityContext.seLinuxOptions [object,nullable] Set SELinux options in container
+  ## @param metrics.securityContext.runAsUser Set NGINX Exporter container's Security Context runAsUser
+  ##
+  securityContext:
+    enabled: false
+    seLinuxOptions: null
+    runAsUser: 1001
+  ## Prometheus exporter service parameters
+  ##
+  service:
+    ## @param metrics.service.port NGINX Prometheus exporter service port
+    ##
+    port: 9113
+    ## @param metrics.service.annotations [object] Annotations for the Prometheus exporter service
+    ##
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "{{ .Values.metrics.service.port }}"
