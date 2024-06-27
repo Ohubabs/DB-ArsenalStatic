@@ -1,0 +1,33 @@
+pipeline{
+    agent { 
+        label 'kubernetes'
+  }
+    stages{
+        //stage('Clone Code'){
+        //    steps{
+        //        sh "echo cloning code"
+        //        sh "echo clone code complete"
+        //        git 'https://github.com/Konoha-23/konoha_arsenal.git'
+        //    }
+        //}
+        stage('launch static website: arsenal.domainname'){
+            steps{
+              withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws_cred', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                sh "echo 'launch static website: arsenal.domainname'"
+                sh "terraform init"
+                sh "terraform validate"
+                sh "terraform plan"
+                sh "terraform apply --auto-approve"
+               }
+            }
+        }
+         stage('Show Arsenal Ngnx app on a Fargate Node'){
+            steps{
+              withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws_cred', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                sh "echo 'Show Arsenal Nginx app running on a Fargate node'"
+                sh "kubectl get po -o wide -n arsenal"
+              }
+            }
+        }
+    }
+}
