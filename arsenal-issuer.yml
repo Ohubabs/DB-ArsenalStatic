@@ -1,0 +1,32 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: arsenal-issuer
+spec:
+  acme:
+    # The ACME server URL
+    server: https://acme-v02.api.letsencrypt.org/directory
+    # Email address used for ACME registration
+    email: <your-email>
+    # Name of a secret used to store the ACME account private key
+    privateKeySecretRef:
+      name: arsenal-priv1
+    # Enable the HTTP-01 challenge provider
+    solvers:
+    - selector:
+        dnsNames:
+          - "<arsenal.aws-registered-domainname>" #domain name for arsenal-ingress
+      dns01:
+        route53:
+          region: <aws-region>
+          # The AWS access key ID can be specified using the literal accessKeyID parameter
+          # or retrieved from a secret using the accessKeyIDSecretRef
+          # If using accessKeyID, omit the accessKeyIDSecretRef parameter and vice-versa
+          hostedZoneID: <aws-hostedzone-id>
+          accessKeyIDSecretRef:
+            name: goku #check DB-Pipeline to enter/change secret details
+            key: kamehameha
+          secretAccessKeySecretRef:
+            name: goku #check DB-Pipeline to enter/change secret details
+            key: spiritbomb
+
